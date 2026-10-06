@@ -59,7 +59,28 @@
 
 milestone 1 complete (didn't push originally because i didnt edit anything)
 
+## Tool Inventory
 
+### 1. search_listings
+* **What it does:** Searches the listings file for items matching a query description, and optionally filters by size and maximum price.
+* **Inputs:** `description` (str), `size` (str | None), `max_price` (float | None).
+* **Returns:** A list of matching listing dicts, each containing `id`, `title`, `description`, `category`, `style_tags`, `size`, `condition`, `price`, `colors`, `brand`, and `platform`.
+* **When empty:** Returns an empty list (`[]`).
+
+### 2. suggest_outfit
+* **What it does:** Suggests one or two outfit pairings using the selected listing item and the user's wardrobe items.
+* **Inputs:** `new_item` (dict), `wardrobe` (dict).
+* **Returns:** A string containing outfit recommendations naming specific wardrobe pieces.
+* **When empty:** If the user's wardrobe has no items, returns general styling ideas for the new item.
+
+### 3. create_fit_card
+* **What it does:** Writes a 2-4 sentence social-media-style caption about the thrifted item, including its price and platform.
+* **Inputs:** `outfit` (str), `new_item` (dict).
+* **Returns:** A string containing the completed fit card caption.
+* **When empty:** If `outfit` is empty or whitespace, returns a fallback descriptive caption based solely on `new_item`.
+
+## Branch Rule
+If `search_listings` returns an empty list (`[]`), set an error message in the session (e.g., `"No items found matching your search."`) and stop the loop immediately without calling downstream tools. Otherwise, pass the first matching item into `suggest_outfit`.
 
 ## Planning Loop
 

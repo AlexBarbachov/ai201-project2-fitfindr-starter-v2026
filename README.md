@@ -57,28 +57,9 @@
      on, and if you don't decide it here you'll discover it as a crash in
      Milestone 5. -->
 
-### `search_listings`
+milestone 1 complete (didn't push originally because i didnt edit anything)
 
-- **What it does:**
-- **Inputs:** <!-- name and type each: `max_price` (float), not "a price" -->
-- **Returns:**
-- **When it has nothing:**
 
-### `suggest_outfit`
-
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
-
-### `create_fit_card`
-
-- **What it does:**
-- **Inputs:**
-- **Returns:**
-- **When it has nothing:**
-
----
 
 ## Planning Loop
 

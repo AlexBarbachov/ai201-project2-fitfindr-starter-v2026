@@ -148,16 +148,14 @@ $ python -c "from tools import create_fit_card; ..."
      instead of an empty list, so I changed it" is the level we want. -->
 
 **Moment 1**
-
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+* *What I asked for:* I asked Claude to help me write a robust size filter for `search_listings` that handles complex thrift sizes like "W30 L30", "S/M", and "XL (oversized)" without triggering false substring matches.
+* *What came back:* Claude provided a regex tokenization approach to separate multi-character sizes from single-letter size tokens.
+* *What I changed:* I implemented the tokenized size comparison logic so that searching for a size "S" wouldn't incorrectly match strings containing "s" elsewhere.
 
 **Moment 2**
-
-- *What I asked for:*
-- *What came back:*
-- *What I changed:*
+* *What I asked for:* I asked Claude to review my `run_agent()` planning loop implementation to ensure state was correctly routed through the session dictionary.
+* *What came back:* Claude pointed out that I was passing function results directly to downstream tools instead of writing them to session keys first.
+* *What I changed:* I updated `run_agent()` so that every tool output explicitly saves into `session` (e.g., `session["selected_item"]`, `session["outfit_suggestion"]`), keeping the state fully visible and testable.
 
 <!-- ═══════════════════════ UNIT 4 — THE TEST ═══════════════════════
 

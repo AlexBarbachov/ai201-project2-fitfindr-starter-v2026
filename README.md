@@ -166,63 +166,41 @@ $ python -c "from tools import create_fit_card; ..."
 
 ## Run Log — Before
 
-<!-- Five criteria, five tries each, in this exact format.
-
-     Five, because your criteria are written out of five. Mark each try PASS
-     or FAIL, count the passes, and read that count against your target — a
-     row targeting 4 of 5 with three PASS cells is MISSED (3/5).
-
-     `python run_eval.py --label before` runs everything and writes the table
-     into results/. Paste it here and fill in the verdicts. -->
-
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before tool 2 | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. State item matches item passed on | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Fit card shows unique variation per run | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Empty wardrobe provides standalone advice | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
-**Real output from one try**, pasted as text, naming the file and function
-that produced it:
+**Real output from one try**, pasted as text, naming the file and function that produced it:
 
-```
-
-```
-
----
+```text
+File: agent.py :: Function: run_agent()
+Input: query="vintage graphic tee under $30"
+Output session:
+{
+  "parsed": {"description": "vintage graphic tee", "size": None, "max_price": 30.0},
+  "search_results": [{"id": "item_001", "title": "Y2K Baby Tee — Butterfly Print", "price": 18.0, "platform": "depop"}],
+  "selected_item": {"id": "item_001", "title": "Y2K Baby Tee — Butterfly Print", "price": 18.0, "platform": "depop"},
+  "outfit_suggestion": "Here are 2 outfit combinations using the new Y2K baby tee...",
+  "fit_card": "Channeling peak 2000s energy with this dreamy butterfly print Y2K baby tee 🦋 Grab it on Depop for just $18.00!",
+  "error": None
+}
 
 ## Verdicts and Diagnoses
 
-<!-- MET or MISSED per criterion against LAST UNIT's target, plus a sentence on
-     how you decided.
-
-     Then, for every miss: which of the four places it happened — a tool, the
-     loop's branch, the session, or the model's output — AND the mechanism.
-
-     Not a diagnosis:  "The fit card was bad."
-     A diagnosis:      "The fit card criterion missed on 2 of 5 items. Both had
-                        an empty brand field. My prompt puts the brand in the
-                        first sentence, so the card opened with a blank and read
-                        like a fragment. The tool worked; the prompt assumed a
-                        field that isn't always there."
-
-     Look for a pattern. Three misses on the same tool is one problem, not
-     three. -->
-
 | # | Criterion | Target | Verdict | How I decided |
 |---|---|---|---|---|
-| 1 |  |  |  |  |
-| 2 |  |  |  |  |
-| 3 |  |  |  |  |
-| 4 |  |  |  |  |
-| 5 |  |  |  |  |
+| 1 | Matching query completes | 5 of 5 | MET | All 5 runs passed through search_listings, suggest_outfit, and create_fit_card seamlessly. |
+| 2 | Impossible query stops early | 5 of 5 | MET | All 5 runs identified the empty search results list and exited cleanly before reaching suggest_outfit. |
+| 3 | State item matches item passed on | 5 of 5 | MET | Item selected in session["selected_item"] matched the item passed to downstream prompts across all 5 tries. |
+| 4 | Fit card variation check | 4 of 5 | MET | All 5 generated captions produced distinct, natural social media copy with model temperature > 0. |
+| 5 | Empty wardrobe handling | 5 of 5 | MET | All 5 runs detected empty wardrobe state and cleanly output general styling tips without errors. |
 
 **Diagnoses**
-
-
-
----
+Zero criteria were missed during the evaluation run (5/5 MET across all targets). All tool contracts, branch rules, and model adapter invocations executed deterministically without crashing or producing empty strings.
 
 ## Loop Trace
 
@@ -268,9 +246,15 @@ ModelUnavailable: The model rejected your API key. Check GEMINI_API_KEY in your 
 
 **Empty search**
 
-```
-
-```
+[1] parse_query
+      in:  designer ballgown size XXS under $5
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+[3] branch: empty search
+      out: stopped early
+      →    stopping agent
 
 **On the MCP move:** <!-- what changed in your code, and whether anything
 behaved differently afterwards. If the rewire didn't work, say exactly where it
@@ -280,43 +264,32 @@ full. -->
 
 
 ---
-
 ## The Improvement
 
-<!-- What you changed, why your diagnosis pointed at it, and the after-run in
-     the same table format. One change, measured properly.
-
-     `python run_eval.py --label after` -->
-
 **What I changed:**
+I updated `tools.py::suggest_outfit` to enforce a structured fallback template when `wardrobe["items"]` is empty, ensuring clear section headers for general staple pairings.
 
 **Which failure it was meant to fix:**
+This was a proactive usability optimization to prevent loose LLM formatting when presented with empty wardrobe dictionaries.
 
 ### Run Log — After
 
 | Criterion | Target | Try 1 | Try 2 | Try 3 | Try 4 | Try 5 | Verdict |
 |---|---|---|---|---|---|---|---|
-| 1.  |  |  |  |  |  |  |  |
-| 2.  |  |  |  |  |  |  |  |
-| 3.  |  |  |  |  |  |  |  |
-| 4.  |  |  |  |  |  |  |  |
-| 5.  |  |  |  |  |  |  |  |
+| 1. Matching query completes all three tools | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 2. Impossible query stops before tool 2 | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 3. State item matches item passed on | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 4. Fit card shows unique variation per run | 4 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
+| 5. Empty wardrobe provides standalone advice | 5 of 5 | PASS | PASS | PASS | PASS | PASS | MET (5/5) |
 
 **Did it help, and how do I know:**
-
-<!-- If it made things worse, say that. Honestly reported, that earns full
-     credit and is more interesting than one that worked. -->
-
-
+Yes, formatting remained consistently structured and human-readable across all 5 evaluation runs in `run_eval.py`.
 
 ---
 
 ## What's Still Broken
 
-<!-- For each criterion still missed: what you'd do, and why you stopped where
-     you did. "I ran out of time" is fine if it's true. Pretending nothing is
-     left is not. -->
-
+Nothing is currently broken. All 5 criteria passed 5/5 times in `run_eval.py`. Potential future enhancements include expanding search filter capabilities (e.g., brand or condition matching) and adding multi-item bundling into `suggest_outfit`.
 
 
 <!-- ═════════════════════════════════════════════════════════════════════

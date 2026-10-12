@@ -41,6 +41,7 @@
 
 <!-- Three or four sentences: what a user asks for, and what they get back. -->
 
+FitFindr is an AI-powered personal styling and thrift shopping agent. A user provides a plain-language text query describing a fashion item they are looking for (e.g., "vintage graphic tee under $30"). The agent parses the request, searches product listings, evaluates the results against a branch condition, pairs the selected item with pieces from the user's wardrobe, and generates a social-media-ready fit card caption.
 
 
 ---
@@ -82,26 +83,14 @@ milestone 1 complete (didn't push originally because i didnt edit anything)
 ## Branch Rule
 If `search_listings` returns an empty list (`[]`), set an error message in the session (e.g., `"No items found matching your search."`) and stop the loop immediately without calling downstream tools. Otherwise, pass the first matching item into `suggest_outfit`.
 
-## Planning Loop
-
-<!-- Your branch rule, stated as a rule — the condition AND both paths — plus
-     the file and function that holds it.
-
-     Like this:
-       "If search_listings returns an empty list, put a message in the session
-        and stop. Otherwise take the first result and go to suggest_outfit."
-        — agent.py::run_agent
-
-     The grader checks your code against what you claim here, so the file and
-     function have to be real. -->
-
-**Branch rule:**
+**Branch rule:** If `search_listings` returns an empty list (`[]`), set an error message in the session and stop the loop immediately without calling downstream tools. Otherwise, pass the first matching item into `suggest_outfit`.
 
 **Where it lives:** `agent.py::run_agent`
 
-**How the query is parsed:** <!-- regex, string splitting, or asking the model — say which -->
+**How the query is parsed:** Python regex patterns (`re.search` and `re.sub`) to extract price ceilings (e.g., `under $30`) and size constraints (e.g., `size M`).
 
-**What moves through the session:** <!-- which fields, in what order -->
+**What moves through the session:** The fields move sequentially through `session`: `query` -> `parsed` -> `search_results` -> `selected_item` -> `outfit_suggestion` -> `fit_card` (or `error` if stopped early).
+
 
 ---
 
@@ -261,6 +250,7 @@ behaved differently afterwards. If the rewire didn't work, say exactly where it
 broke — the error text and the last thing that worked. That earns the point in
 full. -->
 
+The `search_listings` tool was successfully wrapped inside `mcp_server.py` using FastMCP. The direct Python call inside `run_agent()` was replaced with `mcp_client.call_tool("search_listings", ...)`. The output format remained identical, returning a list of matched listing dictionaries over stdio without breaking downstream state execution or trace reporting.
 
 
 ---

@@ -18,6 +18,7 @@ import trace
 from tools import search_listings, suggest_outfit, create_fit_card
 from generate import ModelUnavailable
 from mcp_client import call_tool
+from trace import start_trace, step
 
 # ── session state ─────────────────────────────────────────────────────────────
 
@@ -52,6 +53,7 @@ def new_session(query: str, wardrobe: dict) -> dict:
 import re
 
 def run_agent(query: str, wardrobe: dict) -> dict:
+    start_trace()
     session = new_session(query, wardrobe)
 
     q_lower = query.lower()
@@ -73,37 +75,41 @@ def run_agent(query: str, wardrobe: dict) -> dict:
         "size": size,
         "max_price": max_price,
     }
+    step("parse_query", inputs=query, returned=session["parsed"])
 
-
-
-
+    # Search via MCP
     session["search_results"] = call_tool("search_listings", {
         "description": session["parsed"]["description"],
         "size": session["parsed"]["size"],
         "max_price": session["parsed"]["max_price"],
     })
+    step("search_listings (via MCP)", inputs=session["parsed"], returned=session["search_results"])
 
+    # ⚠️ THE BRANCH: If nothing came back
     if not session["search_results"]:
         session["error"] = (
             f"No listings found matching '{query}'. "
             f"Try increasing your max price, changing the size filter, or broadening your search terms."
         )
+        step("branch: empty search", returned="stopped early", note="stopping agent")
         return session
 
     session["selected_item"] = session["search_results"][0]
+    step("select_item", returned=session["selected_item"])
 
     session["outfit_suggestion"] = suggest_outfit(
         session["selected_item"],
         session["wardrobe"]
     )
+    step("suggest_outfit", returned=session["outfit_suggestion"])
 
     session["fit_card"] = create_fit_card(
         session["outfit_suggestion"],
         session["selected_item"]
     )
+    step("create_fit_card", returned=session["fit_card"])
 
     return session
-
 # ── running it directly ───────────────────────────────────────────────────────
 
 def _show(session: dict) -> None:

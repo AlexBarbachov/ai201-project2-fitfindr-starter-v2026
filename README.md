@@ -237,10 +237,34 @@ that produced it:
      anyone will ever find that out. -->
 
 **Happy path**
+.venv) abarbachov@Grigoris-Laptop ai201-project2-fitfindr-starter-v2026 % python app.py ask 'vintage graphic tee under $30' --trace      
+[1] parse_query
+      in:  vintage graphic tee under $30
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: 10 items: Y2K Baby Tee — Butterfly Print, Vintage Band Tee — Faded Grey, Graphic Tee — 2003 Tour Bootleg Style … +7 more
+[3] select_item
+      out: Y2K Baby Tee — Butterfly Print ($18.0, depop)
+1 model calls this session
 
-```
+ModelUnavailable: The model rejected your API key. Check GEMINI_API_KEY in your .env file, or create a fresh key at aistudio.google.com.
 
-```
+(.venv) abarbachov@Grigoris-Laptop ai201-project2-fitfindr-starter-v2026 % python app.py ask 'designer ballgown size xxs under $5' --trace
+[1] parse_query
+      in:  designer ballgown size xxs under $5
+      out: dict with keys: description, size, max_price
+[2] search_listings (via MCP)
+      in:  dict with keys: description, size, max_price
+      out: [] (empty)
+[3] branch: empty search
+      out: stopped early
+      →    stopping agent
+
+  No listings found matching 'designer ballgown size xxs under $5'. Try increasing your max price, changing the size filter, or broadening your search terms.
+
+0 model calls this session
+(.venv) abarbachov@Grigoris-Laptop ai201-project2-fitfindr-starter-v2026 % 
 
 **Empty search**
 
